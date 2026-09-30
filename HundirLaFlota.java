@@ -36,7 +36,9 @@ public class HundirLaFlota {
         // Prepara el tablero como agua y coloca automaticamente la flota.
         Jugador(String nombre) {
             this.nombre = nombre;
-            for (int[] fila : barcoEn) Arrays.fill(fila, -1);
+            for (int i = 0; i < barcoEn.length; i++) {
+                Arrays.fill(barcoEn[i], -1);
+            }
             colocarBarcos();
         }
 
@@ -100,7 +102,11 @@ public class HundirLaFlota {
         // Cuenta cuantos barcos del jugador siguen sin estar hundidos.
         int barcosRestantes() {
             int numeroBarcos = 0;
-            for (Barco barco : barcos) if (!barco.hundido()) numeroBarcos++;
+            for (int i = 0; i < barcos.size(); i++) {
+                if (!barcos.get(i).hundido()) {
+                    numeroBarcos++;
+                }
+            }
             return numeroBarcos;
         }
 
