@@ -42,13 +42,24 @@ public class HundirLaFlota {
 
         // Coloca aleatoriamente todos los barcos sin que se solapen.
         void colocarBarcos() {
+            // Recorre la lista de barcos
             for (int indiceBarco = 0; indiceBarco < TAMANOS.length; indiceBarco++) {
+                
+                // Crea el barco con su nombre y tamaño, y lo guarda en la lista del jugador.
                 Barco barco = new Barco(NOMBRES[indiceBarco], TAMANOS[indiceBarco]);
                 barcos.add(barco);
+                
+                // Prueba posiciones aleatorias hasta encontrar una válida.
                 boolean colocado = false;
                 while (!colocado) {
+                    // Elige al azar si el barco irá en horizontal o en vertical.
                     boolean horizontal = rnd.nextBoolean();
+
+                    // Elige al azar la casilla donde estará el primer segmento del barco.
                     int fila = rnd.nextInt(TAMANO_TABLERO), columna = rnd.nextInt(TAMANO_TABLERO);
+
+                    // Define hacia dónde "crece" el barco desde esa casilla:
+                    // horizontal -> avanza 1 columna por segmento; vertical -> avanza 1 fila.
                     int desplazamientoFila;
                     int desplazamientoColumna;
                     if (horizontal) {
@@ -58,17 +69,29 @@ public class HundirLaFlota {
                         desplazamientoFila = 1;
                         desplazamientoColumna = 0;
                     }
+
+                    // Calcula en qué casilla terminaría la ultima parte del barco.
                     int filaFinal = fila + desplazamientoFila * (barco.tamano - 1);
                     int columnaFinal = columna + desplazamientoColumna * (barco.tamano - 1);
+
+                    // Si el barco se sale del tablero, descarta esta posición y prueba otra.
                     if (filaFinal >= TAMANO_TABLERO || columnaFinal >= TAMANO_TABLERO) continue;
+
+                    // Comprueba que todas las casillas que ocuparía estén libres (-1 = agua).
                     boolean libre = true;
                     for (int segmento = 0; segmento < barco.tamano; segmento++) {
                         if (barcoEn[fila + desplazamientoFila * segmento][columna + desplazamientoColumna * segmento] != -1) libre = false;
                     }
+                    
+                    // Si alguna casilla ya está ocupada por otro barco, prueba otra posición.
                     if (!libre) continue;
+
+                    // La posición es válida: marca cada casilla con el índice del barco.
                     for (int segmento = 0; segmento < barco.tamano; segmento++) {
                         barcoEn[fila + desplazamientoFila * segmento][columna + desplazamientoColumna * segmento] = indiceBarco;
                     }
+
+                    // Barco colocado: se sale del while y se pasa al siguiente barco.
                     colocado = true;
                 }
             }
@@ -127,41 +150,58 @@ public class HundirLaFlota {
         System.out.println("      TU FLOTA                      TABLERO ENEMIGO");
         String cab = "    A B C D E F G H I J";
         System.out.println(cab + "      " + cab);
+
+        // Recorre las 10 filas, en cada vuelta se construye una línea con los dos tableros.
         for (int fila = 0; fila < TAMANO_TABLERO; fila++) {
+            // Empieza la línea con el número de fila (1-10), alineado a la derecha en 2 caracteres.
             StringBuilder sb = new StringBuilder(String.format("%2d  ", fila + 1));
+
+            // Añade las 10 casillas del tablero PROPIO
             for (int columna = 0; columna < TAMANO_TABLERO; columna++) {
                 sb.append(actual.propio(fila, columna)).append(' ');
             }
+            
+            // Deja un hueco de separación entre los dos tableros
             sb.append("     ").append(String.format("%2d  ", fila + 1));
+
+            // Añade las 10 casillas del tablero ENEMIGO
             for (int columna = 0; columna < TAMANO_TABLERO; columna++) {
                 sb.append(rival.visibleRival(fila, columna)).append(' ');
             }
+            
+            // Muestra los dos tableros
             System.out.println(sb);
         }
         System.out.println("\nLeyenda: ~ agua | B barco | X tocado | O agua disparada | # hundido");
-        System.out.println("Tus barcos restantes: " + actual.barcosRestantes()
-                + " | Barcos enemigos restantes: " + rival.barcosRestantes() + "\n");
+        System.out.println("Tus barcos restantes: " + actual.barcosRestantes() + " | Barcos enemigos restantes: " + rival.barcosRestantes() + "\n");
     }
 
     // Pide una coordenada valida y evita que se repita un disparo anterior.
     static int[] pedirDisparo(Jugador rival) {
         while (true) {
+            
             System.out.print("Introduce coordenada a atacar (ej: B5): ");
+            
             String coordenada = sc.nextLine().trim().toUpperCase();
+
+            // Comprobar longitud de la coordenada
             if (coordenada.length() < 2 || coordenada.length() > 3) {
                 System.out.println("Coordenada no valida.");
                 continue;
             }
+            
+            // Convierte la letra en número de columna
             int columna = coordenada.charAt(0) - 'A';
+
+            // Convierte el resto del texto en número de fila.
             int fila;
             try {
-                fila = Integer.parseInt(coordenada.substring(1)) - 1;
+                fila = Integer.parseInt(coordenada.substring(1)) - 1; // Coge todo menos la primera letra ("B10" -> "10").
             } catch (NumberFormatException excepcion) {
                 System.out.println("Coordenada no valida.");
                 continue;
             }
-            if (columna < 0 || columna >= TAMANO_TABLERO
-                    || fila < 0 || fila >= TAMANO_TABLERO) {
+            if (columna < 0 || columna >= TAMANO_TABLERO || fila < 0 || fila >= TAMANO_TABLERO) {
                 System.out.println("Fuera del tablero (columnas A-J, filas 1-10).");
                 continue;
             }
@@ -185,10 +225,7 @@ public class HundirLaFlota {
 
             // 2. Se cambia de perspectiva para que cada jugador vea su tablero.
             limpiarPantalla();
-            esperarEnter("Es el turno de " + actual.nombre + ".\n"
-                    + "Que " + rival.nombre + " NO mire la pantalla.\n"
-                    + "Pulsa ENTER cuando estes listo...");
-
+            esperarEnter("Es el turno de " + actual.nombre + ".\n" + "Que " + rival.nombre + " NO mire la pantalla.\n" + "Pulsa ENTER cuando estes listo...");
             limpiarPantalla();
             mostrarTableros(actual, rival);
 
