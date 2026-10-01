@@ -22,13 +22,18 @@ class Jugador {
             barcos.add(barco);
             boolean colocado = false;
 
+            // Se prueban posiciones aleatorias hasta encontrar una valida.
             while (!colocado) {
+                // Se elige al azar si el barco sera horizontal o vertical.
                 boolean horizontal = HundirLaFlota.rnd.nextBoolean();
+
+                // Se elige la casilla inicial del barco dentro del tablero.
                 int fila = HundirLaFlota.rnd.nextInt(HundirLaFlota.TAMANO_TABLERO);
                 int columna = HundirLaFlota.rnd.nextInt(HundirLaFlota.TAMANO_TABLERO);
                 int desplazamientoFila;
                 int desplazamientoColumna;
 
+                // Indican hacia donde crece el barco.
                 if (horizontal) {
                     desplazamientoFila = 0;
                     desplazamientoColumna = 1;
@@ -37,21 +42,28 @@ class Jugador {
                     desplazamientoColumna = 0;
                 }
 
+                // Se calcula donde terminaria el barco con esa posicion y orientacion.
                 int filaFinal = fila + desplazamientoFila * (barco.tamano - 1);
                 int columnaFinal = columna + desplazamientoColumna * (barco.tamano - 1);
 
+                // Si el barco se sale del tablero, se descarta esta posicion.
                 if (filaFinal >= HundirLaFlota.TAMANO_TABLERO || columnaFinal >= HundirLaFlota.TAMANO_TABLERO) continue;
                 boolean libre = true;
 
+                // Se comprueba que ninguna casilla elegida este ocupada por otro barco.
                 for (int segmento = 0; segmento < barco.tamano; segmento++) {
                     if (barcoEn[fila + desplazamientoFila * segmento][columna + desplazamientoColumna * segmento] != -1) libre = false;
                 }
 
+                // Si hay solapamiento, se vuelve a probar con otra posicion aleatoria.
                 if (!libre) continue;
+
+                // Se registra el indice del barco en cada casilla que ocupa.
                 for (int segmento = 0; segmento < barco.tamano; segmento++) {
                     barcoEn[fila + desplazamientoFila * segmento][columna + desplazamientoColumna * segmento] = indiceBarco;
                 }
-                
+
+                // La colocacion ha terminado correctamente.
                 colocado = true;
             }
         }
