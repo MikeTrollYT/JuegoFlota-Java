@@ -25,10 +25,9 @@ public class HundirLaFlota {
 
     // Muestra el tablero propio y el tablero enemigo desde la perspectiva actual.
     static void mostrarTableros(Jugador actual, Jugador rival) {
-        System.out.println("=== Turno de " + actual.nombre + " ===\n");
-        System.out.println("      TU FLOTA                      TABLERO ENEMIGO");
+        System.out.println("      TU TABLERO");
         String cab = "    A B C D E F G H I J";
-        System.out.println(cab + "      " + cab);
+        System.out.println(cab);
 
         for (int fila = 0; fila < TAMANO_TABLERO; fila++) {
             StringBuilder sb = new StringBuilder(String.format("%2d  ", fila + 1));
@@ -42,8 +41,54 @@ public class HundirLaFlota {
             System.out.println(sb);
         }
 
-        System.out.println("\nLeyenda: ~ agua | B barco | X tocado | O agua disparada | # hundido");
-        System.out.println("Tus barcos restantes: " + actual.barcosRestantes() + " | Barcos enemigos restantes: " + rival.barcosRestantes() + "\n");
+        System.out.println("\nLeyenda: ~ oculto | * mina | . seguro | 0-8 minas alrededor");
+        System.out.println("Minas por descubrir: " + actual.barcosRestantes() + " | Minas enemigas por descubrir: " + rival.barcosRestantes() + "\n");
+    }
+
+    // Crea los jugadores y repite los turnos hasta que una flota quede destruida.
+    public static void main(String[] args) {
+        Jugador[] jugadores = {new Jugador("Jugador 1"), new Jugador("Jugador 2")};
+        int turno = 0;
+
+        while (true) {
+            Jugador actual = jugadores[turno];
+            Jugador rival = jugadores[1 - turno];
+
+            limpiarPantalla();
+            esperarEnter("Es el turno de " + actual.nombre + ".\n"
+                    + "Que " + rival.nombre + " NO mire la pantalla.\n"
+                    + "Pulsa ENTER cuando estes listo...");
+
+            limpiarPantalla();
+            mostrarTableros(actual, rival);
+
+            int[] disparo = pedirDisparo(rival);
+            int fila = disparo[0], columna = disparo[1];
+            rival.disparado[fila][columna] = true;
+
+            String resultado;
+            int indiceBarco = rival.barcoEn[fila][columna];
+            if (indiceBarco == -1) {
+                int minas = rival.minasAlrededor(fila, columna);
+                resultado = "CASILLA SEGURA. Hay " + minas + " minas alrededor.";
+            } else {
+                resultado = "¡MINA! Has explotado una casilla con bomba.";
+            }
+
+            limpiarPantalla();
+            mostrarTableros(actual, rival);
+            System.out.println(">>> " + resultado + "\n");
+
+            if (rival.barcosRestantes() == 0) {
+                System.out.println("*****************************************");
+                System.out.println("  " + actual.nombre.toUpperCase() + " HA DESCUBIERTO TODA LA MINA ENEMIGA. ¡GANA!");
+                System.out.println("*****************************************");
+                break;
+            }
+
+            esperarEnter("Pulsa ENTER para terminar tu turno...");
+            turno = 1 - turno;
+        }
     }
 
     // Pide una coordenada valida y evita que se repita un disparo anterior.
@@ -78,62 +123,6 @@ public class HundirLaFlota {
                 continue;
             }
             return new int[]{fila, columna};
-        }
-    }
-
-    // Crea los jugadores y repite los turnos hasta que una flota quede destruida.
-    public static void main(String[] args) {
-        Jugador[] jugadores = {new Jugador("Jugador 1"), new Jugador("Jugador 2")};
-        int turno = 0;
-
-        while (true) {
-            // 1. Se selecciona quien juega y quien recibe el disparo.
-            Jugador actual = jugadores[turno];
-            Jugador rival = jugadores[1 - turno];
-
-            // 2. Se cambia de perspectiva para que cada jugador vea su tablero.
-            limpiarPantalla();
-            esperarEnter("Es el turno de " + actual.nombre + ".\n"
-                    + "Que " + rival.nombre + " NO mire la pantalla.\n"
-                    + "Pulsa ENTER cuando estes listo...");
-
-            limpiarPantalla();
-            mostrarTableros(actual, rival);
-
-            // 3. El jugador elige una casilla y se registra el disparo.
-            int[] disparo = pedirDisparo(rival);
-            int fila = disparo[0], columna = disparo[1];
-            rival.disparado[fila][columna] = true;
-
-            String resultado;
-            int indiceBarco = rival.barcoEn[fila][columna];
-            if (indiceBarco == -1) {
-                resultado = "AGUA...";
-            } else {
-                Barco barco = rival.barcos.get(indiceBarco);
-                barco.impactos++;
-                if (barco.hundido()) {
-                    resultado = "¡TOCADO Y HUNDIDO! Has hundido el " + barco.nombre + ".";
-                } else {
-                    resultado = "¡TOCADO!";
-                }
-            }
-
-            // 4. Se enseña el resultado y se comprueba si termina la partida.
-            limpiarPantalla();
-            mostrarTableros(actual, rival);
-            System.out.println(">>> " + resultado + "\n");
-
-            if (rival.barcosRestantes() == 0) {
-                System.out.println("*****************************************");
-                System.out.println("  " + actual.nombre.toUpperCase() + " HA HUNDIDO TODA LA FLOTA ENEMIGA. ¡GANA!");
-                System.out.println("*****************************************");
-                break;
-            }
-
-            // 5. Si la partida continua, comienza el turno del otro jugador.
-            esperarEnter("Pulsa ENTER para terminar tu turno...");
-            turno = 1 - turno;
         }
     }
 }
