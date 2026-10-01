@@ -17,15 +17,18 @@ class Jugador {
     // Coloca aleatoriamente todos los barcos sin que se solapen.
     void colocarBarcos() {
         for (int indiceBarco = 0; indiceBarco < HundirLaFlota.TAMANOS.length; indiceBarco++) {
+
             Barco barco = new Barco(HundirLaFlota.NOMBRES[indiceBarco], HundirLaFlota.TAMANOS[indiceBarco]);
             barcos.add(barco);
             boolean colocado = false;
+
             while (!colocado) {
                 boolean horizontal = HundirLaFlota.rnd.nextBoolean();
                 int fila = HundirLaFlota.rnd.nextInt(HundirLaFlota.TAMANO_TABLERO);
                 int columna = HundirLaFlota.rnd.nextInt(HundirLaFlota.TAMANO_TABLERO);
                 int desplazamientoFila;
                 int desplazamientoColumna;
+
                 if (horizontal) {
                     desplazamientoFila = 0;
                     desplazamientoColumna = 1;
@@ -33,17 +36,22 @@ class Jugador {
                     desplazamientoFila = 1;
                     desplazamientoColumna = 0;
                 }
+
                 int filaFinal = fila + desplazamientoFila * (barco.tamano - 1);
                 int columnaFinal = columna + desplazamientoColumna * (barco.tamano - 1);
+
                 if (filaFinal >= HundirLaFlota.TAMANO_TABLERO || columnaFinal >= HundirLaFlota.TAMANO_TABLERO) continue;
                 boolean libre = true;
+
                 for (int segmento = 0; segmento < barco.tamano; segmento++) {
                     if (barcoEn[fila + desplazamientoFila * segmento][columna + desplazamientoColumna * segmento] != -1) libre = false;
                 }
+
                 if (!libre) continue;
                 for (int segmento = 0; segmento < barco.tamano; segmento++) {
                     barcoEn[fila + desplazamientoFila * segmento][columna + desplazamientoColumna * segmento] = indiceBarco;
                 }
+                
                 colocado = true;
             }
         }
