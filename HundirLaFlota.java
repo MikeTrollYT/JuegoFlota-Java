@@ -8,7 +8,7 @@ public class HundirLaFlota {
     static final String[] NOMBRES = {"Portaaviones", "Acorazado", "Crucero", "Submarino", "Destructor"};
     static final Scanner sc = new Scanner(System.in);
     static final Random rnd = new Random();
-    
+
 
     // Limpia la consola para ocultar el tablero del turno anterior.
     static void limpiarPantalla() {
@@ -29,6 +29,7 @@ public class HundirLaFlota {
         System.out.println("      TU FLOTA                      TABLERO ENEMIGO");
         String cab = "    A B C D E F G H I J";
         System.out.println(cab + "      " + cab);
+
         for (int fila = 0; fila < TAMANO_TABLERO; fila++) {
             StringBuilder sb = new StringBuilder(String.format("%2d  ", fila + 1));
             for (int columna = 0; columna < TAMANO_TABLERO; columna++) {
@@ -40,9 +41,9 @@ public class HundirLaFlota {
             }
             System.out.println(sb);
         }
+
         System.out.println("\nLeyenda: ~ agua | B barco | X tocado | O agua disparada | # hundido");
-        System.out.println("Tus barcos restantes: " + actual.barcosRestantes()
-                + " | Barcos enemigos restantes: " + rival.barcosRestantes() + "\n");
+        System.out.println("Tus barcos restantes: " + actual.barcosRestantes() + " | Barcos enemigos restantes: " + rival.barcosRestantes() + "\n");
     }
 
     // Pide una coordenada valida y evita que se repita un disparo anterior.
@@ -50,23 +51,28 @@ public class HundirLaFlota {
         while (true) {
             System.out.print("Introduce coordenada a atacar (ej: B5): ");
             String coordenada = sc.nextLine().trim().toUpperCase();
+
             if (coordenada.length() < 2 || coordenada.length() > 3) {
                 System.out.println("Coordenada no valida.");
                 continue;
             }
+
             int columna = coordenada.charAt(0) - 'A';
             int fila;
+
             try {
                 fila = Integer.parseInt(coordenada.substring(1)) - 1;
             } catch (NumberFormatException excepcion) {
                 System.out.println("Coordenada no valida.");
                 continue;
             }
+
             if (columna < 0 || columna >= TAMANO_TABLERO
                     || fila < 0 || fila >= TAMANO_TABLERO) {
                 System.out.println("Fuera del tablero (columnas A-J, filas 1-10).");
                 continue;
             }
+            
             if (rival.disparado[fila][columna]) {
                 System.out.println("Ya has disparado ahi. Elige otra casilla.");
                 continue;
